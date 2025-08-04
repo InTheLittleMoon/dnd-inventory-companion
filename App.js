@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
-import { Button, Text, View, TextInput, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React, { useState } from "react";
+import {
+  Button,
+  Text,
+  View,
+  TextInput,
+  StyleSheet,
+  SectionList,
+} from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 const Stack = createNativeStackNavigator();
 
@@ -9,27 +16,76 @@ function WelcomeScreen({ navigation }) {
   return (
     <View style={styles.center}>
       <Text style={styles.title}>Inventory Companion</Text>
-      <Button title="Open Inventory" onPress={() => navigation.navigate('Inventory')} />
+      <Button
+        title="Open Inventory"
+        onPress={() => navigation.navigate("Inventory")}
+      />
     </View>
   );
 }
 
+function groupByCategory(items) {
+  const categories = ["Magic Items", "Potions", "Scrolls", "Non-Magical"];
+
+  return categories.map((cat) => ({
+    title: cat,
+    data: items.filter((item) => item.category === cat),
+  }));
+}
+
 function InventoryScreen({ navigation, inventory }) {
+  const sections = groupByCategory(inventory);
+
   return (
-    <View style={styles.center}>
-      <Text style={styles.title}>Your Inventory</Text>
-      {inventory.map((item, index) => (
-        <Text key={index}>
-          {item.category}: {item.name}
-        </Text>
-      ))}
-      <Button title="Add Item" onPress={() => navigation.navigate('AddItem')} />
+    <View style={{ flex: 1 }}>
+      <SectionList
+        sections={sections}
+        keyExtractor={(item, index) => item.name + index}
+        renderItem={({ item }) => (
+          <View
+            style={{
+              padding: 8,
+              borderBottomWidth: 1,
+              borderBottomColor: "#ddd",
+            }}
+          >
+            <Text style={{ fontSize: 16 }}>{item.name}</Text>
+            {item.desc ? (
+              <Text style={{ color: "#666" }}>{item.desc}</Text>
+            ) : null}
+          </View>
+        )}
+        renderSectionHeader={({ section }) => (
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "bold",
+              backgroundColor: "#eee",
+              padding: 6,
+            }}
+          >
+            {section.title}
+          </Text>
+        )}
+        ListEmptyComponent={
+          <Text style={{ textAlign: "center", marginTop: 20 }}>
+            No items yet
+          </Text>
+        }
+        contentContainerStyle={{ padding: 16 }}
+      />
+      <View style={{ padding: 10 }}>
+        <Button
+          title="Add Item"
+          onPress={() => navigation.navigate("AddItem")}
+        />
+      </View>
     </View>
   );
 }
 
 function AddItemScreen({ navigation }) {
-  const categories = ['Magic Items', 'Potions', 'Scrolls', 'Non-Magical'];
+  const categories = ["Magic Items", "Potions", "Scrolls", "Non-Magical"];
 
   return (
     <View style={styles.center}>
@@ -38,7 +94,9 @@ function AddItemScreen({ navigation }) {
         <Button
           key={cat}
           title={cat}
-          onPress={() => navigation.navigate('AddItemDetails', { category: cat })}
+          onPress={() =>
+            navigation.navigate("AddItemDetails", { category: cat })
+          }
         />
       ))}
     </View>
@@ -47,12 +105,12 @@ function AddItemScreen({ navigation }) {
 
 function AddItemDetailsScreen({ route, navigation, addItem }) {
   const { category } = route.params;
-  const [name, setName] = useState('');
-  const [desc, setDesc] = useState('');
+  const [name, setName] = useState("");
+  const [desc, setDesc] = useState("");
 
   const handleAdd = () => {
     addItem({ category, name, desc });
-    navigation.navigate('Inventory');
+    navigation.navigate("Inventory");
   };
 
   return (
@@ -99,12 +157,17 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
   title: { fontSize: 20, marginBottom: 20 },
   input: {
-    width: '80%',
+    width: "80%",
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     marginBottom: 10,
     padding: 8,
     borderRadius: 5,
